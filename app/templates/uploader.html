@@ -1,0 +1,19 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block container %}
+  <div class="top-pad">
+    <form method="POST"
+        action="{{ url_for('auth.uploader') }}"
+        role="form"
+        enctype="multipart/form-data">
+      {{ form.csrf_token }}
+	  <h1>Upload new File</h1>
+	  <br/>
+      <div class="form-group">{{ form.file.label }}: {{ form.file(style='display:inline;') }}</div>
+	  <div class="form-group">{{ form.record_type.label}}: {{form.record_type()}}</div>
+      <button type="submit" class="btn btn-default">Upload</button>
+    </form>
+  </div>
+	
+{% endblock %}
