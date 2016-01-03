@@ -9,7 +9,8 @@ from flask import request, render_template, flash, redirect, url_for, \
     session, Blueprint, g
 from flask.ext.login import current_user, login_user, logout_user, \
     login_required
-from app import login_manager, google, db
+from app import login_manager, db
+from config import google
 from app.auth.models import User, FileForm
 
 auth = Blueprint('auth', __name__)
