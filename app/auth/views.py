@@ -35,6 +35,7 @@ def get_current_user():
 
 @auth.route('/')
 @auth.route('/home')
+@auth.route('/login')
 def home():
     return render_template('home.html')
 
@@ -67,15 +68,18 @@ def google_authorized(resp):
         access_token=resp['access_token'],
     )).json()
     
-    url = 'http://localhost:9292/api/v1/uploader?email='+userinfo['email']
+    
+    url = 'http://localhost:9292/api/v1/uploader'
+    email = userinfo['email']
+    data = {'email':email}
     try:
-        r = (requests.get(url))
+        r = requests.get(url, data = data)
     except:
         flash('An error occured while processing your request. Please try again. If the problem persists contact the administrator', 'danger')
         return redirect(url_for('auth.home'))
     
         
-    if 'email' not in r.text:
+    if email not in r.text:
         flash('You do not have permission to access. Please contact the administrator', 'danger')
         return redirect(url_for('auth.home'))
 
@@ -103,32 +107,32 @@ def logout():
     logout_user()
     return redirect(url_for('auth.home'))
     
-    
+
+
+
+  
 @auth.route('/uploader', methods=['GET','POST'])
+@login_required
 def uploader():
        
     form = FileForm(request.form)
     url = 'http://localhost:9292/api/v1/student_record'
     
-    
-    if current_user.is_authenticated:
-        if form.validate_on_submit():
-            file = request.files['file']
-            record_type=form.record_type.data
-            uploader_email = current_user.username
-            data = {'uploader_email':uploader_email, 'record_type':record_type}
-            print record_type
-            if file and allowed_file(file.filename):
-                files = {'file': file.stream}
-                #filename = secure_filename(file.filename)
-                r = requests.post(url, files=files, data=data)
-                
-                flash('File successfully uploaded','success')
-            else:
-                flash('No selected file/Unsupported file','danger')
-        if form.errors:
-            flash(form.errors, 'danger')     
-        return render_template('uploader.html', form = form)
-    flash('Access Denied', 'danger')        
-    return redirect(url_for('auth.home'))
+    if form.validate_on_submit():
+        file = request.files['file']
+        record_type=form.record_type.data
+        uploader_email = current_user.username
+        data = {'uploader_email':uploader_email, 'record_type':record_type}
+        if file and allowed_file(file.filename):
+            files = {'file': file.stream}
+            #filename = secure_filename(file.filename)
+            r = requests.post(url, files=files, data=data)
+            
+            flash('File successfully uploaded','success')
+        else:
+            flash('No selected file/Unsupported file','danger')
+    if form.errors:
+        flash(form.errors, 'danger')     
+    return render_template('uploader.html', form = form)
+       
     
